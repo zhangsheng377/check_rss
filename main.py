@@ -8,7 +8,7 @@ import requests
 
 from UTILS.config import LOGGING_LEVEL, VERSION
 from UTILS.config_ftqq import ftqq_sendkey
-from UTILS.db_sheets import get_rss, get_rsses, insert_rsses, update_one_rss
+from UTILS.db_sheets import get_rss, get_rsses, update_one_rss
 from UTILS.utils import check_rss, parse_rss
 
 logging.getLogger().setLevel(LOGGING_LEVEL)
