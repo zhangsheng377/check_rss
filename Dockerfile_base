@@ -1,0 +1,7 @@
+FROM zhangsheng377/ubuntu:latest
+# ENTRYPOINT []
+
+# RUN pip3 config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+RUN pip3 install feedparser pymongo requests flask gevent
+
+# CMD ["/bin/bash"]

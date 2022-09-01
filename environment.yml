@@ -1,0 +1,14 @@
+name: check_rss
+channels:
+    - conda-forge
+    - defaults
+dependencies:
+  - feedparser
+  - pymongo
+  - requests
+  - flask
+  - gevent
+  - pip
+  - pip:
+    - 
+# prefix: /mnt/nfs/zsd_server/miniconda3/envs/check_rss

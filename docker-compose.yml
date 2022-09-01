@@ -1,0 +1,31 @@
+version: "2.4"
+services:
+  handle:
+    image: zhangsheng377/check_rss_image:latest
+    container_name: check_rss_handle
+    restart: always
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    logging:
+      options:
+        max-size: "10m"
+    entrypoint:
+      - /bin/bash
+      - docker_cmd_handle.sh
+
+  server:
+    image: zhangsheng377/check_rss_image:latest
+    container_name: check_rss_server
+    restart: always
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "22224:22224"
+    logging:
+      options:
+        max-size: "10m"
+    entrypoint:
+      - /bin/bash
+      - docker_cmd_server.sh
