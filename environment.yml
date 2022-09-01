@@ -8,6 +8,7 @@ dependencies:
   - requests
   - flask
   - gevent
+  - redis
   - pip
   - pip:
     - 
