@@ -4,7 +4,7 @@ FROM zhangsheng377/check_rss_base:latest
 RUN git clone https://github.com/zhangsheng377/check_rss.git --depth=1
 ARG FQTT_SEND_KEY
 RUN echo "ftqq_sendkey = \"$FQTT_SEND_KEY\" "\
-> /check_rss/UTILS/config_fqtt.py
+> /check_rss/UTILS/config_ftqq.py
 
 WORKDIR /check_rss
 
