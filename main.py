@@ -55,7 +55,7 @@ def handle_rss(rss_url):
                     print(r)
                 else:
                     logging.debug(f'更新失败: {rss_url} {rss_feed_title}\n')
-            if not old_rss or old_rss['feed_title'] != rss_feed_title:
+            if not old_rss and old_rss.get('feed_title', '') != rss_feed_title:
                 update_rss(rss_url, rss_entry.id, rss_entry.title)
         except Exception as e:
             logging.warning("handle_rss error.", e)
