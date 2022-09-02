@@ -28,6 +28,15 @@ def update_rss(rss_url, uuid, title):
     return False
 
 
+def update_rss_feed_title(rss_url, feed_title):
+    _filter = {'_id': rss_url}
+    _update = {'$set': {'feed_title': feed_title}}
+    result = update_one_rss(filter=_filter, update=_update)
+    if result is not None and result.modified_count > 0:
+        return True
+    return False
+
+
 def handle_rss(rss_url):
     with rss_locks[rss_url]:
         try:
@@ -46,10 +55,12 @@ def handle_rss(rss_url):
                     print(r)
                 else:
                     logging.debug(f'更新失败: {rss_url} {rss_feed_title}\n')
+            if not old_rss or old_rss['feed_title'] != rss_feed_title:
+                update_rss(rss_url, rss_entry.id, rss_entry.title)
         except Exception as e:
             logging.warning("handle_rss error.", e)
 
-        schdule.enter(60*30, 0, handle_rss, (rss_url,))
+        schdule.enter(60 * 30, 0, handle_rss, (rss_url,))
 
 
 def discover_rss():

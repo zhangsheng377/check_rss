@@ -6,10 +6,8 @@ from gevent.pywsgi import WSGIServer
 from UTILS.utils import check_rss
 from UTILS.db_sheets import insert_rsses
 
-
 port = 22224
 app = Flask(__name__, template_folder='site')
-
 
 logging.getLogger().setLevel(logging.INFO)
 
@@ -23,7 +21,7 @@ def index():
 def subscribe_rss():
     rss_url = request.values.get('rss_url')
     if check_rss(rss_url):
-        if insert_rsses(document={'_id': rss_url, 'last_uuid': '', 'last_title': ''}):
+        if insert_rsses(document={'_id': rss_url, 'last_uuid': '', 'last_title': '', 'feed_title': ''}):
             logging.info(f"insert_rsses success: {rss_url}")
             return "插入数据库成功"
         else:
