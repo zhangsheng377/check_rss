@@ -1,8 +1,7 @@
-mongodb_host = '192.168.10.5'
-mongodb_port = 27017
+import os
 
-rabbitmq_host = '192.168.10.5'
-rabbitmq_port = 5672
+mongodb_host = os.getenv('MONGODB_HOST')
+mongodb_port = os.getenv('MONGODB_PORT')
 
-redis_host = '192.168.10.5'
-redis_port = 6379
+redis_host = os.getenv('REDIS_HOST')
+redis_port = os.getenv('REDIS_PORT')
