@@ -1,15 +1,14 @@
 import json
-import re
-from datetime import datetime
 
 import redis
 
-from DATABASE import database_factory
-from UTILS.config_port import redis_host, redis_port
+from UTILS.database_factory import DatabaseFactory
+from UTILS.config_port import redis_host, redis_port, mongodb_host, mongodb_port
 
 
 def get_db_sheet(database_name, sheet_name):
-    return database_factory(database_name=database_name, sheet_name=sheet_name, model="pymongo")
+    database_factory = DatabaseFactory(host=mongodb_host, port=mongodb_port, model='pymongo')
+    return database_factory.get(database_name=database_name, sheet_name=sheet_name)
 
 
 def _get_data(key: str, get_db_func):

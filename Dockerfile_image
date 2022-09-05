@@ -6,6 +6,8 @@ ARG FQTT_SEND_KEY
 RUN echo "ftqq_sendkey = \"$FQTT_SEND_KEY\" "\
 > /check_rss/UTILS/config_ftqq.py
 
+RUN git clone https://github.com/BZ-coding/database_factory --depth=1 /check_rss/UTILS/database_factory
+
 WORKDIR /check_rss
 
 # CMD ["/bin/bash"]
