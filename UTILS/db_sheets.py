@@ -1,7 +1,4 @@
-import json
-
-import redis
-
+from UTILS.cache_redis import CacheRedis
 from UTILS.database_factory import DatabaseFactory
 from UTILS.config_port import redis_host, redis_port, mongodb_host, mongodb_port
 
@@ -11,14 +8,7 @@ def get_db_sheet(database_name, sheet_name):
     return database_factory.get(database_name=database_name, sheet_name=sheet_name)
 
 
-def _get_data(key: str, get_db_func):
-    data_redis = db_redis.get(key)
-    if data_redis is None:
-        data = get_db_func()
-        db_redis.set(key, json.dumps(data))
-    else:
-        data = json.loads(data_redis)
-    return data
+cache_redis = CacheRedis(host=redis_host, port=redis_port, db=0)
 
 
 def get_db_rsses():
@@ -27,7 +17,7 @@ def get_db_rsses():
 
 
 def get_rsses():
-    return _get_data('rss', get_db_rsses)
+    return cache_redis.get_cache_from_db('rss', get_db_rsses)
 
 
 def get_rss(rss_url):
@@ -40,7 +30,7 @@ def get_rss(rss_url):
 
 def update_redis_rsses_from_db():
     data = get_db_rsses()
-    db_redis.set('rss', json.dumps(data))
+    cache_redis.set('rss', data)
 
 
 def insert_rsses(document):
@@ -58,10 +48,7 @@ def update_one_rss(filter, update):
     return result
 
 
-db_redis = redis.Redis(host=redis_host, port=redis_port, db=0)
-
 if __name__ == '__main__':
     rsses = get_rsses()
     print(rsses)
     print(type(rsses), type(rsses[0]))
-
