@@ -58,9 +58,9 @@ def handle_rss(rss_url):
         try:
             rss = parse_rss(rss_url)
             rss_entry = rss.entries[0]
+            rss_feed_title = rss.feed.title
             db_rss = get_rss(rss_url)
             if check_rss_update(db_rss, rss_entry):
-                rss_feed_title = rss.feed.title
                 if update_rss(rss_url, rss_entry.id, rss_entry.title):
                     logging.info(f'更新成功: {rss_url} {rss_feed_title}\n')
 
