@@ -14,14 +14,16 @@ logging.getLogger().setLevel(logging.INFO)
 
 @app.route('/')
 def index():
-    return render_template('index.html', title='监控rss')
+    return render_template('index.html', title='监控rss', check_elements=['uuid', 'title'])
 
 
 @app.route('/subscribe_rss', methods=['POST'])
 def subscribe_rss():
     rss_url = request.values.get('rss_url')
+    check_element = request.form.get('check_element')
     if check_rss(rss_url):
-        if insert_rsses(document={'_id': rss_url, 'last_uuid': '', 'last_title': '', 'feed_title': ''}):
+        if insert_rsses(document={'_id': rss_url, 'last_uuid': '', 'last_title': '', 'feed_title': '',
+                                  'check_element': check_element}):
             logging.info(f"insert_rsses success: {rss_url}")
             return "插入数据库成功"
         else:

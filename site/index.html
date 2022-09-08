@@ -2,11 +2,16 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>{{ title }}</title>
 </head>
 <body>
 <form action="subscribe_rss" method="post">
- 
+    <select name="check_element">
+        {% for element in check_elements %}
+        <option value="{{element}}">{{element}}</option>
+        {% endfor %}
+    </select>
+
     <p>rss_url: <input type="text" name="rss_url"></p>
     <input type="submit">
 </form>

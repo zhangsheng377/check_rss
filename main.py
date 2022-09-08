@@ -37,25 +37,43 @@ def update_rss_feed_title(rss_url, feed_title):
     return False
 
 
+def get_check_element_value(db_rss, rss_entry):
+    check_element = db_rss.get('check_element', 'uuid')
+    if check_element == 'uuid':
+        return db_rss['last_uuid'], rss_entry.id
+    elif check_element == 'title':
+        return db_rss['last_title'], rss_entry.title
+    return None, None
+
+
+def check_rss_update(db_rss, rss_entry):
+    if not db_rss:
+        return True
+    old_check_element_value, check_element_value = get_check_element_value(db_rss, rss_entry)
+    return old_check_element_value != check_element_value
+
+
 def handle_rss(rss_url):
     with rss_locks[rss_url]:
         try:
             rss = parse_rss(rss_url)
             rss_entry = rss.entries[0]
-            rss_feed_title = rss.feed.title
-            old_rss = get_rss(rss_url)
-            if not old_rss or old_rss['last_uuid'] != rss_entry.id:
+            db_rss = get_rss(rss_url)
+            if check_rss_update(db_rss, rss_entry):
+                rss_feed_title = rss.feed.title
                 if update_rss(rss_url, rss_entry.id, rss_entry.title):
                     logging.info(f'更新成功: {rss_url} {rss_feed_title}\n')
 
+                    old_check_element_value, check_element_value = get_check_element_value(db_rss, rss_entry)
+
                     msg_title = f"我的监测任务[{rss_feed_title}]"
-                    msg_desp = f"{rss_entry.title} <-- {old_rss['last_title']}\n\n[详情链接]({rss_entry.link})"
+                    msg_desp = f"{check_element_value} <-- {old_check_element_value}\n\n[详情链接]({rss_entry.link})"
                     r = requests.post(f'https://sctapi.ftqq.com/{ftqq_sendkey}.send',
                                       data={'title': msg_title, 'desp': msg_desp})
                     print(r)
                 else:
                     logging.debug(f'更新失败: {rss_url} {rss_feed_title}\n')
-            if not old_rss and old_rss.get('feed_title', '') != rss_feed_title:
+            if not db_rss and db_rss.get('feed_title', '') != rss_feed_title:
                 update_rss(rss_url, rss_entry.id, rss_entry.title)
         except Exception as e:
             logging.warning("handle_rss error.", e)
