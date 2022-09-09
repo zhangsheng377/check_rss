@@ -67,7 +67,7 @@ def handle_rss(rss_url):
                     old_check_element_value, check_element_value = get_check_element_value(db_rss, rss_entry)
 
                     msg_title = f"我的监测任务[{rss_feed_title}]"
-                    msg_desp = f"{check_element_value} <-- {old_check_element_value}\n\n[详情链接]({rss_entry.link})"
+                    msg_desp = f"{rss_entry.title} <-- {db_rss['last_title']}\n\n[详情链接]({rss_entry.link})"
                     r = requests.post(f'https://sctapi.ftqq.com/{ftqq_sendkey}.send',
                                       data={'title': msg_title, 'desp': msg_desp})
                     print(r)
