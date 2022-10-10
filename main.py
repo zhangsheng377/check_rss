@@ -77,7 +77,7 @@ def handle_rss(rss_url):
                     print(r)
 
                     if need_download(db_rss):
-                        command = f"you-get -o /mnt/nfs/download/bilibili {rss_entry.link}"
+                        command = f"you-get -o /mnt/nfs/download/bilibili --no-caption {rss_entry.link}"
                         subprocess.Popen(command, shell=True)
 
                 else:
