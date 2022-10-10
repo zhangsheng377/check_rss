@@ -1,6 +1,7 @@
 import logging
 import re
 import sched
+import subprocess
 import time
 import threading
 
@@ -53,6 +54,11 @@ def check_rss_update(db_rss, rss_entry):
     return old_check_element_value != check_element_value
 
 
+def need_download(db_rss):
+    need_download_str = db_rss.get('need_download', 'not_download')
+    return need_download_str == 'need_download'
+
+
 def handle_rss(rss_url):
     with rss_locks[rss_url]:
         try:
@@ -64,13 +70,16 @@ def handle_rss(rss_url):
                 if update_rss(rss_url, rss_entry.id, rss_entry.title):
                     logging.info(f'更新成功: {rss_url} {rss_feed_title}\n')
 
-                    old_check_element_value, check_element_value = get_check_element_value(db_rss, rss_entry)
-
                     msg_title = f"我的监测任务[{rss_feed_title}]"
                     msg_desp = f"{rss_entry.title} <-- {db_rss['last_title']}\n\n[详情链接]({rss_entry.link})"
                     r = requests.post(f'https://sctapi.ftqq.com/{ftqq_sendkey}.send',
                                       data={'title': msg_title, 'desp': msg_desp})
                     print(r)
+
+                    if need_download(db_rss):
+                        command = f"you-get -o /mnt/nfs/download/bilibili {rss_entry.link}"
+                        subprocess.Popen(command, shell=True)
+
                 else:
                     logging.debug(f'更新失败: {rss_url} {rss_feed_title}\n')
             if not db_rss or db_rss.get('feed_title', '') != rss_feed_title:

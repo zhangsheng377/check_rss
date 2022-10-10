@@ -11,6 +11,11 @@
         <option value="{{element}}">{{element}}</option>
         {% endfor %}
     </select>
+    <select name="need_download">
+        {% for element in need_download %}
+        <option value="{{element}}">{{element}}</option>
+        {% endfor %}
+    </select>
 
     <p>rss_url: <input type="text" name="rss_url"></p>
     <input type="submit">

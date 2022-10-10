@@ -11,5 +11,5 @@ dependencies:
   - redis
   - pip
   - pip:
-    - 
+    - you-get
 # prefix: /mnt/nfs/zsd_server/miniconda3/envs/check_rss
