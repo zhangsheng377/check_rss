@@ -6,6 +6,7 @@ import time
 import threading
 
 import requests
+import PyRSS2Gen
 
 from UTILS.config import LOGGING_LEVEL, VERSION
 from UTILS.config_ftqq import ftqq_sendkey
@@ -17,6 +18,8 @@ logging.getLogger().setLevel(LOGGING_LEVEL)
 schdule = sched.scheduler(time.time, time.sleep)
 
 rss_locks = {}
+
+my_rss_items = []
 
 
 def update_rss(rss_url, uuid, title):
@@ -63,27 +66,41 @@ def handle_rss(rss_url):
     with rss_locks[rss_url]:
         try:
             rss = parse_rss(rss_url)
-            rss_entry = rss.entries[0]
-            rss_feed_title = rss.feed.title
-            db_rss = get_rss(rss_url)
-            if check_rss_update(db_rss, rss_entry):
-                if update_rss(rss_url, rss_entry.id, rss_entry.title):
-                    logging.info(f'更新成功: {rss_url} {rss_feed_title}\n')
+            if not rss or len(rss.entries) <= 0:
+                logging.warning(f"rss parse failed. rss: {rss}")
+            else:
+                rss_entry = rss.entries[0]
+                rss_feed_title = rss.feed.title
+                db_rss = get_rss(rss_url)
+                if check_rss_update(db_rss, rss_entry):
+                    if update_rss(rss_url, rss_entry.id, rss_entry.title):
+                        logging.info(f'更新成功: {rss_url} {rss_feed_title} {rss_entry}\n')
 
-                    msg_title = f"我的监测任务[{rss_feed_title}]"
-                    msg_desp = f"{rss_entry.title} <-- {db_rss['last_title']}\n\n[详情链接]({rss_entry.link})"
-                    r = requests.post(f'https://sctapi.ftqq.com/{ftqq_sendkey}.send',
-                                      data={'title': msg_title, 'desp': msg_desp})
-                    print(r)
+                        msg_title = f"我的监测任务[{rss_feed_title}]"
+                        msg_desp = f"{rss_entry.title} <-- {db_rss['last_title']}\n\n[详情链接]({rss_entry.link})"
+                        r = requests.post(f'https://sctapi.ftqq.com/{ftqq_sendkey}.send',
+                                          data={'title': msg_title, 'desp': msg_desp})
+                        logging.info(r)
 
-                    if need_download(db_rss):
-                        command = f"you-get -o /mnt/nfs/download/bilibili --no-caption {rss_entry.link}"
-                        subprocess.Popen(command, shell=True)
+                        rss_item = PyRSS2Gen.RSSItem(
+                            title=rss_entry.title,
+                            link=rss_entry.link,
+                            description=rss_entry.description,
+                            pubDate=rss_entry.pubDate,
+                        )
+                        my_rss_items.append(rss_item)
+                        rss = PyRSS2Gen.RSS2(title='zsd\'s rss', link='http://www.zhangshengdong.com', description='',
+                                             items=my_rss_items)
+                        rss.write_xml(open('myrss.xml', "w", encoding='utf-8'), encoding='utf-8')
 
-                else:
-                    logging.debug(f'更新失败: {rss_url} {rss_feed_title}\n')
-            if not db_rss or db_rss.get('feed_title', '') != rss_feed_title:
-                update_rss_feed_title(rss_url, rss_feed_title)
+                        if need_download(db_rss):
+                            command = f"you-get -o /mnt/nfs/download/bilibili --no-caption {rss_entry.link}"
+                            subprocess.Popen(command, shell=True)
+
+                    else:
+                        logging.debug(f'更新失败: {rss_url} {rss_feed_title}\n')
+                if not db_rss or db_rss.get('feed_title', '') != rss_feed_title:
+                    update_rss_feed_title(rss_url, rss_feed_title)
         except Exception as e:
             logging.warning("handle_rss error.", e)
 

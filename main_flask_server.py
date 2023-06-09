@@ -14,7 +14,8 @@ logging.getLogger().setLevel(logging.INFO)
 
 @app.route('/')
 def index():
-    return render_template('index.html', title='监控rss', check_elements=['uuid', 'title'], need_download=['not_download', 'need_download'])
+    return render_template('index.html', title='监控rss', check_elements=['uuid', 'title'],
+                           need_download=['not_download', 'need_download'])
 
 
 @app.route('/subscribe_rss', methods=['POST'])
@@ -32,6 +33,13 @@ def subscribe_rss():
             return "插入数据库失败"
     else:
         return "rss_url解析失败"
+
+
+@app.route('/get_my_rss', methods=['POST', 'GET'])
+def get_my_rss():
+    with open('myrss.xml', 'r') as f:
+        s = f.read()
+    return str(s)
 
 
 if __name__ == '__main__':
