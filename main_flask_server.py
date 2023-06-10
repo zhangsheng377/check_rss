@@ -37,7 +37,7 @@ def subscribe_rss():
 
 @app.route('/get_my_rss', methods=['POST', 'GET'])
 def get_my_rss():
-    with open('myrss.xml', 'r') as f:
+    with open('/mnt/nfs/download/myrss/myrss.xml', 'r') as f:
         s = f.read()
     return str(s), 200, {'Content-Type': 'text/css; charset=utf-8'}
 

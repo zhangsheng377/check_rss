@@ -92,7 +92,8 @@ def handle_rss(rss_url):
                         my_rss_items.append(rss_item)
                         rss2gen = PyRSS2Gen.RSS2(title='zsd\'s rss', link='http://www.zhangshengdong.com',
                                                  description='', items=my_rss_items)
-                        rss2gen.write_xml(open('myrss.xml', "w", encoding='utf-8'), encoding='utf-8')
+                        rss2gen.write_xml(open('/mnt/nfs/download/myrss/myrss.xml', "w", encoding='utf-8'),
+                                          encoding='utf-8')
 
                         if need_download(db_rss):
                             command = f"you-get -o /mnt/nfs/download/bilibili --no-caption {rss_entry.link}"
