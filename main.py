@@ -75,6 +75,7 @@ def handle_rss(rss_url):
                 if check_rss_update(db_rss, rss_entry):
                     if update_rss(rss_url, rss_entry.id, rss_entry.title):
                         logging.info(f'更新成功: {rss_url} {rss_feed_title} {rss_entry}\n')
+                        logging.info(f'更新成功1: {rss}\n')
 
                         msg_title = f"我的监测任务[{rss_feed_title}]"
                         msg_desp = f"{rss_entry.title} <-- {db_rss['last_title']}\n\n[详情链接]({rss_entry.link})"
@@ -85,13 +86,13 @@ def handle_rss(rss_url):
                         rss_item = PyRSS2Gen.RSSItem(
                             title=rss_entry.title,
                             link=rss_entry.link,
-                            description=rss_entry.description,
-                            pubDate=rss_entry.pubDate,
+                            description=rss_entry.summary,
+                            pubDate=rss_entry.published,
                         )
                         my_rss_items.append(rss_item)
-                        rss = PyRSS2Gen.RSS2(title='zsd\'s rss', link='http://www.zhangshengdong.com', description='',
-                                             items=my_rss_items)
-                        rss.write_xml(open('myrss.xml', "w", encoding='utf-8'), encoding='utf-8')
+                        rss2gen = PyRSS2Gen.RSS2(title='zsd\'s rss', link='http://www.zhangshengdong.com',
+                                                 description='', items=my_rss_items)
+                        rss2gen.write_xml(open('myrss.xml', "w", encoding='utf-8'), encoding='utf-8')
 
                         if need_download(db_rss):
                             command = f"you-get -o /mnt/nfs/download/bilibili --no-caption {rss_entry.link}"
