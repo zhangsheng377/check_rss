@@ -89,7 +89,7 @@ def handle_rss(rss_url):
                             description=rss_entry.summary,
                             pubDate=rss_entry.published,
                         )
-                        my_rss_items.append(rss_item)
+                        my_rss_items.insert(0, rss_item)
                         rss2gen = PyRSS2Gen.RSS2(title='zsd\'s rss', link='http://www.zhangshengdong.com',
                                                  description='', items=my_rss_items)
                         rss2gen.write_xml(open('/mnt/nfs/download/myrss/myrss.xml', "w", encoding='utf-8'),
