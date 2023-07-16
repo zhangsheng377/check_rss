@@ -39,7 +39,7 @@ def subscribe_rss():
 def get_my_rss():
     with open('/mnt/nfs/download/myrss/myrss.xml', 'r') as f:
         s = f.read()
-    return str(s), 200, {'Content-Type': 'text/css; charset=utf-8'}
+    return str(s), 200, {'Content-Type': 'text/xml; charset=utf-8'}
 
 
 if __name__ == '__main__':
