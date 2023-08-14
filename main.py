@@ -1,3 +1,4 @@
+import json
 import logging
 import re
 import sched
@@ -9,7 +10,7 @@ import requests
 import PyRSS2Gen
 
 from UTILS.config import LOGGING_LEVEL, VERSION
-from UTILS.config_ftqq import ftqq_sendkey
+from UTILS.config_ftqq import ftqq_sendkey, bz_sendkey
 from UTILS.db_sheets import get_rss, get_rsses, update_one_rss
 from UTILS.utils import check_rss, parse_rss
 
@@ -81,6 +82,21 @@ def handle_rss(rss_url):
                         msg_desp = f"{rss_entry.title} <-- {db_rss['last_title']}\n\n[详情链接]({rss_entry.link})"
                         r = requests.post(f'https://sctapi.ftqq.com/{ftqq_sendkey}.send',
                                           data={'title': msg_title, 'desp': msg_desp})
+                        logging.info(r)
+                        webhook = f"https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key={bz_sendkey}"
+                        header = {"Content-Type": "application/json"}
+                        proxies = {}
+                        message = {
+                            "msgtype": "markdown",
+                            "markdown": {
+                                "content": f"# {msg_title} \n \
+                                        > <font color=\"warning\">{rss_entry.title}</font> \n \
+                                        > <font color=\"comment\"> <-- {db_rss['last_title']}</font> \n \
+                                        > <font color=\"info\"> </font> [详情链接]({rss_entry.link}) "
+                            }
+                        }
+                        message_json = json.dumps(message)
+                        r = requests.post(url=webhook, data=message_json, headers=header, proxies=proxies)
                         logging.info(r)
 
                         rss_item = PyRSS2Gen.RSSItem(

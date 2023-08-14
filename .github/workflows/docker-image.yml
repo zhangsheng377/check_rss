@@ -63,6 +63,6 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build . --file ${{ env.DOCKER_FILE }} --tag ${{ env.REGISTRY }}/${{ secrets.DOCKER_HUB_USER }}/${{ env.IMAGE_NAME }}:latest --build-arg FQTT_SEND_KEY=${{ secrets.FQTT_SEND_KEY }}
+          docker build . --file ${{ env.DOCKER_FILE }} --tag ${{ env.REGISTRY }}/${{ secrets.DOCKER_HUB_USER }}/${{ env.IMAGE_NAME }}:latest --build-arg FQTT_SEND_KEY=${{ secrets.FQTT_SEND_KEY }} --build-arg BZ_SEND_KEY=${{ secrets.BZ_SEND_KEY }}
           
           docker push ${{ env.REGISTRY }}/${{ secrets.DOCKER_HUB_USER }}/${{ env.IMAGE_NAME }}:latest
