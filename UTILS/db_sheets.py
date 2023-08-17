@@ -1,11 +1,12 @@
 from UTILS.cache_redis import CacheRedis
-from UTILS.database_factory import DatabaseFactory
+from UTILS.database_factory import DataBaseFactory
 from UTILS.config_port import redis_host, redis_port, mongodb_host, mongodb_port
 
 
 def get_db_sheet(database_name, sheet_name):
-    database_factory = DatabaseFactory(host=mongodb_host, port=mongodb_port, model='pymongo')
-    return database_factory.get(database_name=database_name, sheet_name=sheet_name)
+    database = DataBaseFactory.get(database_type='pymongo', database_name=database_name, sheet_name=sheet_name,
+                                   host=mongodb_host, port=mongodb_port)
+    return database
 
 
 cache_redis = CacheRedis(host=redis_host, port=redis_port, db=0)
