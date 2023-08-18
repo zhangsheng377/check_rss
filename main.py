@@ -83,17 +83,25 @@ def handle_rss(rss_url):
                         r = requests.post(f'https://sctapi.ftqq.com/{ftqq_sendkey}.send',
                                           data={'title': msg_title, 'desp': msg_desp})
                         logging.info(r)
-                        webhook = f"https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key={bz_sendkey}"
+                        webhook = f"http://server.zhangshengdong.com:22226/{bz_sendkey}.send"
                         header = {"Content-Type": "application/json"}
                         proxies = {}
+                        image_url = None
+                        try:
+                            pattern = re.compile("""<img[^>]+src=["']([^'"<>]+)["'][^<>]+/?>""")
+                            summary = rss_entry.summary
+                            image_urls = pattern.findall(summary)
+                            if len(image_urls) > 0:
+                                image_url = image_urls[0]
+                        except Exception as e:
+                            print(e)
                         message = {
-                            "msgtype": "markdown",
-                            "markdown": {
-                                "content": f"# {msg_title} \n \
-                                        > <font color=\"warning\">{rss_entry.title}</font> \n \
-                                        > <font color=\"comment\"> <-- {db_rss['last_title']}</font> \n \
-                                        > <font color=\"info\"> </font> [详情链接]({rss_entry.link}) "
-                            }
+                            "msgtype": "template_card_news_notice",
+                            "rss_feed_title": rss_feed_title,
+                            "url": rss_entry.link,
+                            "title": rss_entry.title,
+                            "last_title": db_rss['last_title'],
+                            "image_url": image_url,
                         }
                         message_json = json.dumps(message)
                         r = requests.post(url=webhook, data=message_json, headers=header, proxies=proxies)
