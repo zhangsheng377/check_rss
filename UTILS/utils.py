@@ -16,6 +16,6 @@ def check_rss(url):
     if not result:
         return False
     if result.status != 200:
-        logging.warning(f"rss: {url} can not parse! status: {result.status}")
+        logging.debug(f"rss: {url} can not parse! status: {result.status}")
         return False
     return True
