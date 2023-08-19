@@ -9,7 +9,7 @@ import threading
 import requests
 import PyRSS2Gen
 
-from UTILS.config import LOGGING_LEVEL, VERSION
+from UTILS.config import LOGGING_LEVEL, VERSION, bz_chan_addr
 from UTILS.config_ftqq import ftqq_sendkey, bz_sendkey
 from UTILS.db_sheets import get_rss, get_rsses, update_one_rss
 from UTILS.utils import check_rss, parse_rss
@@ -83,7 +83,7 @@ def handle_rss(rss_url):
                         r = requests.post(f'https://sctapi.ftqq.com/{ftqq_sendkey}.send',
                                           data={'title': msg_title, 'desp': msg_desp})
                         logging.info(r)
-                        webhook = f"http://server.zhangshengdong.com:22226/{bz_sendkey}.send"
+                        webhook = f"http://{bz_chan_addr}/{bz_sendkey}.send"
                         header = {"Content-Type": "application/json"}
                         proxies = {}
                         image_url = None
@@ -141,12 +141,12 @@ def discover_rss():
             rss_url = rss['_id']
             # print(rss_url)
             if rss_url not in rss_locks:
-                logging.info(f"discover rss: {rss_url}")
+                logging.debug(f"discover rss: {rss_url}")
                 if check_rss(rss_url):
                     rss_locks[rss_url] = threading.Lock()
                     schdule.enter(0, 0, handle_rss, (rss_url,))
                 else:
-                    logging.warning(f"rss: {rss_url} can not parse!")
+                    logging.debug(f"rss: {rss_url} can not parse!")
     except Exception as e:
         logging.warning("discover_rss error.", e)
     schdule.enter(60, 0, discover_rss, )
