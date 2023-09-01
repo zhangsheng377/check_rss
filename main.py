@@ -96,12 +96,21 @@ def handle_rss(rss_url):
                         except Exception as e:
                             print(e)
                         message = {
-                            "msgtype": "template_card_news_notice",
+                            # "msgtype": "template_card_news_notice",
+                            "msgtype": "news",
                             "rss_feed_title": rss_feed_title,
                             "url": rss_entry.link,
                             "title": rss_entry.title,
                             "last_title": db_rss['last_title'],
                             "image_url": image_url,
+                            "articles" : [
+                               {
+                                   "title" : rss_entry.title,
+                                   "description" : f" <-- {db_rss['last_title']}",
+                                   "url" : rss_entry.link,
+                                   "picurl" : image_url
+                               }
+                            ]
                         }
                         message_json = json.dumps(message)
                         r = requests.post(url=webhook, data=message_json, headers=header, proxies=proxies)
