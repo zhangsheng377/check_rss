@@ -80,8 +80,16 @@ def handle_rss(rss_url):
 
                         msg_title = f"我的监测任务[{rss_feed_title}]"
                         msg_desp = f"{rss_entry.title} <-- {db_rss['last_title']}\n\n[详情链接]({rss_entry.link})"
-                        r = requests.post(f'https://sctapi.ftqq.com/{ftqq_sendkey}.send',
-                                          data={'title': msg_title, 'desp': msg_desp})
+                        message = {
+                            "msgtype": "markdown",
+                            "title": msg_title,
+                            "desp": msg_desp
+                        }
+                        # r = requests.post(f'https://sctapi.ftqq.com/{ftqq_sendkey}.send',
+                        #                   data={'title': msg_title, 'desp': msg_desp})
+                        message_json = json.dumps(message)
+                        r = requests.post(f'http://{bz_chan_addr}/{ftqq_sendkey}.send',
+                                          data=message_json)
                         logging.info(r)
                         webhook = f"http://{bz_chan_addr}/{bz_sendkey}.send"
                         header = {"Content-Type": "application/json"}
@@ -96,20 +104,14 @@ def handle_rss(rss_url):
                         except Exception as e:
                             print(e)
                         message = {
-                            # "msgtype": "template_card_news_notice",
                             "msgtype": "news",
-                            "rss_feed_title": rss_feed_title,
-                            "url": rss_entry.link,
-                            "title": rss_entry.title,
-                            "last_title": db_rss['last_title'],
-                            "image_url": image_url,
-                            "articles" : [
-                               {
-                                   "title" : rss_entry.title,
-                                   "description" : f" <-- {db_rss['last_title']}",
-                                   "url" : rss_entry.link,
-                                   "picurl" : image_url
-                               }
+                            "articles": [
+                                {
+                                    "title": rss_entry.title,
+                                    "description": f" <-- {db_rss['last_title']}\n【{rss_feed_title}】",
+                                    "url": rss_entry.link,
+                                    "picurl": image_url
+                                }
                             ]
                         }
                         message_json = json.dumps(message)
