@@ -108,7 +108,7 @@ def handle_rss(rss_url):
                             "articles": [
                                 {
                                     "title": rss_entry.title,
-                                    "description": f" <-- {db_rss['last_title']}\n【{rss_feed_title}】",
+                                    "description": f" <-- {db_rss['last_title']}\n\n【{rss_feed_title}】",
                                     "url": rss_entry.link,
                                     "picurl": image_url
                                 }
