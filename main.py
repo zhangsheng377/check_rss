@@ -78,6 +78,9 @@ def handle_rss(rss_url):
                         logging.info(f'更新成功: {rss_url} {rss_feed_title} {rss_entry}\n')
                         logging.info(f'更新成功1: {rss}\n')
 
+                        header = {"Content-Type": "application/json"}
+                        proxies = {}
+
                         msg_title = f"我的监测任务[{rss_feed_title}]"
                         msg_desp = f"{rss_entry.title} <-- {db_rss['last_title']}\n\n[详情链接]({rss_entry.link})"
                         message = {
@@ -89,11 +92,10 @@ def handle_rss(rss_url):
                         #                   data={'title': msg_title, 'desp': msg_desp})
                         message_json = json.dumps(message)
                         r = requests.post(f'http://{bz_chan_addr}/{ftqq_sendkey}.send',
-                                          data=message_json)
+                                          data=message_json, headers=header, proxies=proxies)
                         logging.info(r)
+
                         webhook = f"http://{bz_chan_addr}/{bz_sendkey}.send"
-                        header = {"Content-Type": "application/json"}
-                        proxies = {}
                         image_url = None
                         try:
                             pattern = re.compile("""<img[^>]+src=["']([^'"<>]+)["'][^<>]+/?>""")
