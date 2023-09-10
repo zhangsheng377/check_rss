@@ -1,18 +1,15 @@
-import json
 import logging
-import re
 import sched
 import subprocess
 import time
 import threading
 
-import requests
 import PyRSS2Gen
 
-from UTILS.config import LOGGING_LEVEL, VERSION, bz_chan_addr
-from UTILS.config_ftqq import ftqq_sendkey, bz_sendkey
-from UTILS.db_sheets import get_rss, get_rsses, update_one_rss
-from UTILS.utils import check_rss, parse_rss
+from UTILS.config import LOGGING_LEVEL, VERSION
+from UTILS.db_sheets import get_rss, get_rsses
+from UTILS.utils import check_rss, parse_rss, update_rss, update_rss_feed_title, check_rss_update, need_download, \
+    send_notice, save_rss_items
 
 logging.getLogger().setLevel(LOGGING_LEVEL)
 
@@ -20,47 +17,7 @@ schdule = sched.scheduler(time.time, time.sleep)
 
 rss_locks = {}
 
-my_rss_items = []
-
-
-def update_rss(rss_url, uuid, title):
-    _filter = {'_id': rss_url}
-    _update = {'$set': {'last_uuid': uuid,
-                        'last_title': title}}
-    result = update_one_rss(filter=_filter, update=_update)
-    if result is not None and result.modified_count > 0:
-        return True
-    return False
-
-
-def update_rss_feed_title(rss_url, feed_title):
-    _filter = {'_id': rss_url}
-    _update = {'$set': {'feed_title': feed_title}}
-    result = update_one_rss(filter=_filter, update=_update)
-    if result is not None and result.modified_count > 0:
-        return True
-    return False
-
-
-def get_check_element_value(db_rss, rss_entry):
-    check_element = db_rss.get('check_element', 'uuid')
-    if check_element == 'uuid':
-        return db_rss['last_uuid'], rss_entry.id
-    elif check_element == 'title':
-        return db_rss['last_title'], rss_entry.title
-    return None, None
-
-
-def check_rss_update(db_rss, rss_entry):
-    if not db_rss:
-        return True
-    old_check_element_value, check_element_value = get_check_element_value(db_rss, rss_entry)
-    return old_check_element_value != check_element_value
-
-
-def need_download(db_rss):
-    need_download_str = db_rss.get('need_download', 'not_download')
-    return need_download_str == 'need_download'
+my_rss_items = {}
 
 
 def handle_rss(rss_url):
@@ -78,59 +35,11 @@ def handle_rss(rss_url):
                         logging.info(f'更新成功: {rss_url} {rss_feed_title} {rss_entry}\n')
                         logging.info(f'更新成功1: {rss}\n')
 
-                        header = {"Content-Type": "application/json"}
-                        proxies = {}
+                        send_notice(rss_entry=rss_entry, rss_feed_title=rss_feed_title, last_title=db_rss['last_title'])
 
-                        msg_title = f"我的监测任务[{rss_feed_title}]"
-                        msg_desp = f"{rss_entry.title} <-- {db_rss['last_title']}\n\n[详情链接]({rss_entry.link})"
-                        message = {
-                            "msgtype": "markdown",
-                            "title": msg_title,
-                            "desp": msg_desp
-                        }
-                        # r = requests.post(f'https://sctapi.ftqq.com/{ftqq_sendkey}.send',
-                        #                   data={'title': msg_title, 'desp': msg_desp})
-                        message_json = json.dumps(message)
-                        r = requests.post(f'http://{bz_chan_addr}/{ftqq_sendkey}.send',
-                                          data=message_json, headers=header, proxies=proxies)
-                        logging.info(r)
+                        update_rss_item(rss_entry, rss_feed_title)
 
-                        webhook = f"http://{bz_chan_addr}/{bz_sendkey}.send"
-                        image_url = None
-                        try:
-                            pattern = re.compile("""<img[^>]+src=["']([^'"<>]+)["'][^<>]+/?>""")
-                            summary = rss_entry.summary
-                            image_urls = pattern.findall(summary)
-                            if len(image_urls) > 0:
-                                image_url = image_urls[0]
-                        except Exception as e:
-                            print(e)
-                        message = {
-                            "msgtype": "news",
-                            "articles": [
-                                {
-                                    "title": rss_entry.title,
-                                    "description": f" <-- {db_rss['last_title']}\n\n【{rss_feed_title}】",
-                                    "url": rss_entry.link,
-                                    "picurl": image_url
-                                }
-                            ]
-                        }
-                        message_json = json.dumps(message)
-                        r = requests.post(url=webhook, data=message_json, headers=header, proxies=proxies)
-                        logging.info(r)
-
-                        rss_item = PyRSS2Gen.RSSItem(
-                            title=rss_entry.title,
-                            link=rss_entry.link,
-                            description=rss_entry.summary,
-                            pubDate=rss_entry.published,
-                        )
-                        my_rss_items.insert(0, rss_item)
-                        rss2gen = PyRSS2Gen.RSS2(title='zsd\'s rss', link='http://www.zhangshengdong.com',
-                                                 description='', items=my_rss_items)
-                        rss2gen.write_xml(open('/mnt/nfs/download/myrss/myrss.xml', "w", encoding='utf-8'),
-                                          encoding='utf-8')
+                        save_rss_items(rss_items=my_rss_items)
 
                         if need_download(db_rss):
                             command = f"you-get -o /mnt/nfs/download/bilibili --no-caption {rss_entry.link}"
@@ -145,6 +54,18 @@ def handle_rss(rss_url):
             logging.warning("handle_rss error.", e)
 
         schdule.enter(60 * 30, 0, handle_rss, (rss_url,))
+
+
+def update_rss_item(rss_entry, rss_feed_title):
+    rss_item = PyRSS2Gen.RSSItem(
+        title=rss_entry.title,
+        link=rss_entry.link,
+        description=rss_entry.summary,
+        pubDate=rss_entry.published,
+    )
+    if rss_feed_title not in my_rss_items:
+        my_rss_items[rss_feed_title] = []
+    my_rss_items[rss_feed_title].insert(0, rss_item)
 
 
 def discover_rss():
