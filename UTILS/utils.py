@@ -114,22 +114,6 @@ def send_notice(rss_entry, rss_feed_title, last_title):
 
 
 def save_rss_items(rss_items):
-    with open('/mnt/nfs/download/myrss/myrss.xml', "w", encoding='utf-8') as rss_file:
-        rss_file.write(f"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<rss version=\"2.0\">")
-        for feed_title in rss_items:
-            channel_xml = make_rss_channel_xml(feed_title, rss_items[feed_title])
-
-            rss_file.write(f"\n{channel_xml}")
-        rss_file.write(f"\n</rss>")
-    # rss2gen.write_xml(open('/mnt/nfs/download/myrss/myrss.xml', "w", encoding='utf-8'),
-    #                   encoding='utf-8')
-
-
-def make_rss_channel_xml(feed_title, items):
-    rss2gen = PyRSS2Gen.RSS2(title=feed_title, link='', description='', items=items)
-    rss_xml = rss2gen.to_xml(encoding='utf-8')
-    dom = minidom.parseString(rss_xml)
-    elem = dom.documentElement
-    channel = elem.getElementsByTagName('channel')[0]
-    channel_xml = channel.toxml()
-    return channel_xml
+    rss2gen = PyRSS2Gen.RSS2(title='zsd\'s rss', link='http://www.zhangshengdong.com', description='', items=rss_items)
+    rss2gen.write_xml(open('/mnt/nfs/download/myrss/myrss.xml', "w", encoding='utf-8'),
+                      encoding='utf-8')

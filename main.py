@@ -17,7 +17,7 @@ schdule = sched.scheduler(time.time, time.sleep)
 
 rss_locks = {}
 
-my_rss_items = {}
+my_rss_items = []
 
 
 def handle_rss(rss_url):
@@ -62,10 +62,10 @@ def update_rss_item(rss_entry, rss_feed_title):
         link=rss_entry.link,
         description=rss_entry.summary,
         pubDate=rss_entry.published,
+        categories=rss_feed_title,
+        source=rss_feed_title
     )
-    if rss_feed_title not in my_rss_items:
-        my_rss_items[rss_feed_title] = []
-    my_rss_items[rss_feed_title].insert(0, rss_item)
+    my_rss_items.insert(0, rss_item)
 
 
 def discover_rss():
