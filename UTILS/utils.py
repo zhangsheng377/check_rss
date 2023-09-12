@@ -74,19 +74,19 @@ def need_download(db_rss):
 def send_notice(rss_entry, rss_feed_title, last_title):
     header = {"Content-Type": "application/json"}
     proxies = {}
-    msg_title = f"我的监测任务[{rss_feed_title}]"
-    msg_desp = f"{rss_entry.title} <-- {last_title}\n\n[详情链接]({rss_entry.link})"
-    message = {
-        "msgtype": "markdown",
-        "title": msg_title,
-        "desp": msg_desp
-    }
-    # r = requests.post(f'https://sctapi.ftqq.com/{ftqq_sendkey}.send',
-    #                   data={'title': msg_title, 'desp': msg_desp})
-    message_json = json.dumps(message)
-    r = requests.post(f'http://{bz_chan_addr}/{ftqq_sendkey}.send',
-                      data=message_json, headers=header, proxies=proxies)
-    logging.info(r)
+    # msg_title = f"我的监测任务[{rss_feed_title}]"
+    # msg_desp = f"{rss_entry.title} <-- {last_title}\n\n[详情链接]({rss_entry.link})"
+    # message = {
+    #     "msgtype": "markdown",
+    #     "title": msg_title,
+    #     "desp": msg_desp
+    # }
+    # # r = requests.post(f'https://sctapi.ftqq.com/{ftqq_sendkey}.send',
+    # #                   data={'title': msg_title, 'desp': msg_desp})
+    # message_json = json.dumps(message)
+    # r = requests.post(f'http://{bz_chan_addr}/{ftqq_sendkey}.send',
+    #                   data=message_json, headers=header, proxies=proxies)
+    # logging.info(r)
     webhook = f"http://{bz_chan_addr}/{bz_sendkey}.send"
     image_url = None
     try:
