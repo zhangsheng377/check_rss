@@ -62,8 +62,8 @@ def update_rss_item(rss_entry, rss_feed_title):
         link=rss_entry.link,
         description=rss_entry.summary,
         pubDate=rss_entry.published,
-        categories=rss_feed_title,
-        source=rss_feed_title
+        categories=[rss_feed_title],
+        source=PyRSS2Gen.Source(name=rss_feed_title, url='')
     )
     my_rss_items.insert(0, rss_item)
 
