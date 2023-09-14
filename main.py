@@ -30,6 +30,11 @@ def handle_rss(rss_url):
                 rss_entry = rss.entries[0]
                 rss_feed_title = rss.feed.title
                 db_rss = get_rss(rss_url)
+                if db_rss and db_rss.get('feed_title', '') != rss_feed_title:
+                    if rss_feed_title and rss_feed_title != 'undefined 的 bilibili 空间':
+                        update_rss_feed_title(rss_url, rss_feed_title)
+                    else:
+                        rss_feed_title = db_rss.get('feed_title', rss_feed_title)
                 if check_rss_update(db_rss, rss_entry):
                     if update_rss(rss_url, rss_entry.id, rss_entry.title):
                         logging.info(f'更新成功: {rss_url} {rss_feed_title} {rss_entry}\n')
@@ -47,9 +52,6 @@ def handle_rss(rss_url):
 
                     else:
                         logging.debug(f'更新失败: {rss_url} {rss_feed_title}\n')
-                if not db_rss or db_rss.get('feed_title', '') != rss_feed_title:
-                    if rss_feed_title != 'undefined 的 bilibili 空间':
-                        update_rss_feed_title(rss_url, rss_feed_title)
         except Exception as e:
             logging.warning("handle_rss error.", e)
 
