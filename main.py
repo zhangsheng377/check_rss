@@ -31,7 +31,7 @@ def handle_rss(rss_url):
                 rss_feed_title = rss.feed.title
                 db_rss = get_rss(rss_url)
                 if db_rss and db_rss.get('feed_title', '') != rss_feed_title:
-                    if rss_feed_title and rss_feed_title != 'undefined 的 bilibili 空间':
+                    if rss_feed_title and rss_feed_title not in ['undefined 的 bilibili 空间', 'null 的 bilibili 空间', ' 的 bilibili 空间', '的 bilibili 空间']:
                         update_rss_feed_title(rss_url, rss_feed_title)
                     else:
                         rss_feed_title = db_rss.get('feed_title', rss_feed_title)
