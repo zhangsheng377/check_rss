@@ -25,7 +25,7 @@ def check_rss(url):
         print(e)
     if not result:
         return False
-    if result.status != 200:
+    if result.status not in [200, 301]:
         logging.debug(f"rss: {url} can not parse! status: {result.status}")
         return False
     return True
